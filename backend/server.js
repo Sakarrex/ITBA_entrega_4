@@ -8,6 +8,7 @@ import { connectDB } from './config/db.js';
 import logger from './middlewares/logger.js';
 import errorMiddleware from './middlewares/error.js';
 import healthRouter from './controllers/health.js';
+import authRouter from './routes/auth.routes.js';
 import productosRouter from './routes/productos.routes.js';
 
 const directorioActual = path.dirname(fileURLToPath(import.meta.url));
@@ -27,6 +28,7 @@ app.use(express.json({ limit: '10kb' }));
 app.use(logger);
 app.use('/api', healthRouter);
 app.use('/api/productos', productosRouter);
+app.use('/api/auth', authRouter);
 
 app.use((request, response, next) => {
   const error = new Error(

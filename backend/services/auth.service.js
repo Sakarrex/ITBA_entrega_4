@@ -45,6 +45,10 @@ export async function autenticar({ email, password }) {
   return datosUsuario;
 }
 
+export function buscarUsuarioPorId(id) {
+  return User.findOne({ _id: id, activo: true }).lean();
+}
+
 export function firmarToken(usuario) {
   const secret = process.env.JWT_SECRET;
 
