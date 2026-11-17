@@ -1,0 +1,22 @@
+{
+  "name": "muebleria-jota-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "mongoose": "^8.18.0",
+    "yup": "^1.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
