@@ -3,7 +3,7 @@ Eres un desarrollador de software Senior experto en el stack MERN (MongoDB, Expr
 Este proyecto es un monorepo que contiene el cliente (`/client`) y el backend (`/backend`).
 ## 2. Tecnologías y Herramientas Base
 - **Frontend:** React 19.3, Vite 8.3.0, React Router DOM, Axios 1.20+, React Hook Form, Yup.
-- **Backend:** Node.js 24.21.0 (LTS), Express 5.2.1, Mongoose ^8.24.7, CORS, Helmet.
+- **Backend:** Node.js 24.21.0 (LTS), Express 5.2.1, Mongoose ^8.24.7, bcrypt, jsonwebtoken, CORS, Helmet.
 - **Lenguaje:** JavaScript (ES6+) / TypeScript (asumir JS a menos que se indique TS).
 - **Estilos:** Tailwind CSS o CSS Modules (según configuración de componentes).
 - No utilices bibliotecas nuevas a menos sean estrictamente necesarias o que consideres sean una alternativa favorable, pero informa y espera una respuesta sobre estas sugerencias antes de implementarlas.

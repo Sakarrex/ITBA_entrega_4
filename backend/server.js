@@ -43,6 +43,10 @@ async function iniciarServidor() {
     throw new Error('Falta la variable de entorno CLIENT_ORIGIN');
   }
 
+  if (!process.env.JWT_SECRET) {
+    throw new Error('Falta la variable de entorno JWT_SECRET');
+  }
+
   await connectDB();
 
   app.listen(port, () => {
