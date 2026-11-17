@@ -205,6 +205,17 @@ Formatear los archivos del proyecto:
 
     npm run format
 
+Revisar vulnerabilidades en las dependencias de produccion:
+
+    npm audit --omit=dev --prefix backend
+    npm audit --omit=dev --prefix client
+
+No instalar versiones inferiores a Mongoose 8.24.7 ni mantener resoluciones
+de qs inferiores a 6.16.1. El cliente usa Zod 4.6.6 o superior para evitar
+la vulnerabilidad conocida en colecciones grandes. Si npm indica una
+vulnerabilidad transitiva, actualizar el lockfile y considerar un override
+solo dentro de la linea compatible con el paquete que la utiliza.
+
 Validar manualmente un mensaje de commit convencional:
 
     printf "feat: add product catalog\n" | npx commitlint
@@ -258,6 +269,6 @@ Ejemplos validos:
 - MongoDB local: disponible en Docker Compose, con volumen persistente y seed manual del catálogo.
 - Modelo Mongoose: definido en `backend/models/product.js` con validaciones para la colección `productos`.
 - API: continúa leyendo los productos desde `backend/data/productos.js`; el modelo todavía no está conectado a las rutas.
-- CORS y Helmet: retirados temporalmente para esta primera prueba.
+- CORS y Helmet: disponibles en el backend.
 - Endpoint disponible: GET /api/health.
 - Tests automatizados: aun no configurados.

@@ -123,13 +123,31 @@ La primera entrega sigue desplegada en https://muebleria-hermanos.netlify.app/
 - React Router DOM
 - Node.js y Express 5
 - dotenv
+- Helmet y CORS
 - MongoDB 8 en Docker Compose
-- Mongoose para el script de seed
+- Mongoose 8.24.7 o superior para el script de seed
+- Yup y React Hook Form
+- Axios para las llamadas HTTP del cliente
 - CSS3
 - ESLint para análisis estático y linting
 - Prettier para el formato del código
 - Husky para ejecutar verificaciones automáticas en los commits
 - Git y GitHub para control de versiones
+
+## Seguridad de dependencias
+
+Antes de actualizar paquetes o desplegar, revisar las dependencias de producción:
+
+```bash
+npm audit --omit=dev --prefix backend
+npm audit --omit=dev --prefix client
+```
+
+Las vulnerabilidades conocidas deben corregirse en las dependencias runtime.
+Las correcciones actuales mantienen Mongoose en la línea `8.24.x`, `qs` en
+`6.16.1` o superior y Zod en `4.6.6` o superior. Backend y cliente utilizan
+overrides o rangos de versión para evitar que los lockfiles vuelvan a resolver
+las versiones inseguras transitivas conocidas.
 
 ## API
 

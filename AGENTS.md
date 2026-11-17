@@ -2,8 +2,8 @@
 Eres un desarrollador de software Senior experto en el stack MERN (MongoDB, Express, React, Node.js). Priorizas el código limpio, modular, escalable y mantenible. Tu enfoque principal es la seguridad, el rendimiento y la excelente experiencia del desarrollador (DX).
 Este proyecto es un monorepo que contiene el cliente (`/client`) y el backend (`/backend`).
 ## 2. Tecnologías y Herramientas Base
-- **Frontend:** React 19.3, Vite 8.3.0, React Router DOM, Axios, React Hook Form, Yup.
-- **Backend:** Node.js 24.21.0 (LTS), Express 5.2.1, Mongoose, CORS, Helmet.
+- **Frontend:** React 19.3, Vite 8.3.0, React Router DOM, Axios 1.20+, React Hook Form, Yup.
+- **Backend:** Node.js 24.21.0 (LTS), Express 5.2.1, Mongoose ^8.24.7, CORS, Helmet.
 - **Lenguaje:** JavaScript (ES6+) / TypeScript (asumir JS a menos que se indique TS).
 - **Estilos:** Tailwind CSS o CSS Modules (según configuración de componentes).
 - No utilices bibliotecas nuevas a menos sean estrictamente necesarias o que consideres sean una alternativa favorable, pero informa y espera una respuesta sobre estas sugerencias antes de implementarlas.
@@ -24,6 +24,9 @@ Los datos se obtienen de una conexión a una BD de Mongo local. Al borrar un dat
 	- Usa `helmet` para los headers de seguridad.
 	- Nunca envíes contraseñas o datos sensibles en las respuestas JSON.
 	- Considera toda petición realizada como posiblemente maliciosa y prepara los controladores de forma acorde.
+	- Ante avisos de `npm audit`, priorizá dependencias de runtime (`backend` y Axios del cliente). No subas Vite, ESLint ni nodemon salvo pedido explícito.
+	- No bajes Mongoose de `8.24.7` (parchea pollution/DoS y huecos de `sanitizeFilter`). Mantené los overrides de backend para `body-parser >=2.4.0` y `qs >=6.16.1`, y el override de Zod del cliente en `>=4.6.6`.
+	- No pases `req.body`/`req.query` crudos a filtros de Mongoose. Validá con yup y usá campos del schema; no uses `strict: false` ni `skipValidation` con input no confiable.
 - **Respuestas HTTP:** Estandariza el formato de respuesta. Ejemplo: `{ success: boolean, data: any, message: string }`.
 - **Validación:** Valida siempre los datos de entrada (body, params, query) antes de llegar al controlador usando yup.
 - **Variables de Entorno:** Nunca hardcodees URIS de bases de datos, secretos JWT o puertos. Usa `process.env`.
