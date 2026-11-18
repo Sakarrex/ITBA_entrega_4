@@ -75,14 +75,16 @@ Los datos se conservan en el volumen Docker `mongodb_data`.
 ---
 
 El catálogo fuente está en `backend/data/productos.js`. Con MongoDB iniciado,
-ejecutar el seed:
+ejecutar el seed. También crea o actualiza el administrador con
+`ADMIN_EMAIL` y `ADMIN_PASSWORD` configurados en `.env`:
 
     npm run db:seed
 
 El script carga los documentos en la colección `productos`, insertando o
-actualizando por el campo `id`. Es repetible y no elimina otros documentos.
-La API del backend sigue leyendo desde el archivo local; este seed no cambia
-las rutas ni las llamadas existentes.
+actualizando por nombre, y guarda la contraseña del administrador hasheada con
+bcrypt. Es repetible y no elimina otros productos. Los usuarios que se
+registran reciben el rol `cliente`; el administrador configurado por el seed
+recibe el rol `admin`.
 
 Comprobar el estado del contenedor desde la raíz:
 
@@ -163,6 +165,33 @@ Probar una ruta inexistente:
     curl.exe http://localhost:3000/api/ruta-inexistente
 
 Debe devolver una respuesta 404 con el formato estandar del backend.
+
+### Autenticación y autorización
+
+Las rutas de autenticación están bajo `/api/auth`:
+
+- `POST /api/auth/registro`: crea un usuario `cliente` y responde `201` sin
+  incluir la contraseña.
+- `POST /api/auth/login`: valida email y contraseña y responde `200` con
+  `{ token, usuario }` dentro de `data`.
+- `GET /api/auth/perfil`: requiere `Authorization: Bearer <token>`.
+
+El JWT firmado con `JWT_SECRET` contiene `sub` (id del usuario) y `rol`, y su
+vigencia se configura mediante `JWT_EXPIRES_IN`. Las rutas de lectura de
+productos son públicas; crear, actualizar o eliminar productos requiere un
+token válido y el rol `admin`. El middleware global de CORS responde a los
+preflight `OPTIONS` antes de la autenticación de las rutas.
+
+Los ejemplos manuales están en `backend/requests/auth.http`. Para ejecutarlos,
+configurar `AUTH_TEST_EMAIL` y `AUTH_TEST_PASSWORD` con valores de prueba,
+además de `ADMIN_EMAIL` y `ADMIN_PASSWORD` para el login administrativo. El caso
+de token vencido requiere `JWT_EXPIRED_TOKEN`, un JWT firmado con el
+`JWT_SECRET` activo y con su expiración pasada; el archivo incluye un comando
+PowerShell de ejemplo para generarlo.
+
+El backend entrega el JWT, pero el cliente todavía no implementa el flujo de
+login ni guarda ese token. Actualmente el `localStorage` del frontend se usa
+solo para persistir el carrito.
 
 El backend usa el puerto 3000 por defecto. Para cambiarlo, definir PORT antes
 de iniciar el servidor.
@@ -266,9 +295,10 @@ Ejemplos validos:
 
 - Frontend: Vite + React.
 - Backend: Express + dotenv.
-- MongoDB local: disponible en Docker Compose, con volumen persistente y seed manual del catálogo.
+- MongoDB local: disponible en Docker Compose, con volumen persistente y seed manual de productos y administrador.
 - Modelo Mongoose: definido en `backend/models/product.js` con validaciones para la colección `productos`.
-- API: continúa leyendo los productos desde `backend/data/productos.js`; el modelo todavía no está conectado a las rutas.
+- Autenticación: registro, login y perfil con JWT; el seed configura un usuario administrador.
+- Autorización de productos: lecturas públicas y operaciones de escritura limitadas al rol `admin`.
 - CORS y Helmet: disponibles en el backend.
-- Endpoint disponible: GET /api/health.
-- Tests automatizados: aun no configurados.
+- Endpoints disponibles: `/api/health`, `/api/auth/*` y `/api/productos`.
+- Pruebas automatizadas: aún no configuradas; hay ejemplos manuales en `backend/requests/`.

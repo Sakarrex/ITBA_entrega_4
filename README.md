@@ -54,6 +54,8 @@ npm run db:seed
 El seed inserta o actualiza los productos por nombre y el usuario administrador
 por email. La contraseña del administrador se guarda hasheada con bcrypt. Se
 puede ejecutar más de una vez; no elimina productos ajenos al catálogo fuente.
+El registro de usuarios públicos asigna el rol `cliente`; el rol `admin` se
+asigna al usuario configurado por el seed.
 
 Para iniciar el backend y el cliente juntos:
 
@@ -155,10 +157,29 @@ las versiones inseguras transitivas conocidas.
 
 Todas las respuestas tienen el formato `{ success, data, message }`.
 
-| Método | Ruta                 | Descripción                          |
-| ------ | -------------------- | ------------------------------------ |
-| GET    | `/api/productos`     | Listado completo de productos        |
-| GET    | `/api/productos/:id` | Producto por id (`404` si no existe) |
+| Método | Ruta                 | Acceso                     | Descripción                          |
+| ------ | -------------------- | -------------------------- | ------------------------------------ |
+| POST   | `/api/auth/registro` | Público                    | Registra un cliente (`201`)          |
+| POST   | `/api/auth/login`    | Público                    | Inicia sesión y entrega un JWT       |
+| GET    | `/api/auth/perfil`   | JWT válido                 | Devuelve el perfil del usuario       |
+| GET    | `/api/productos`     | Público                    | Lista los productos                  |
+| GET    | `/api/productos/:id` | Público                    | Producto por id (`404` si no existe) |
+| POST   | `/api/productos`     | JWT válido con rol `admin` | Crea un producto                     |
+| PUT    | `/api/productos/:id` | JWT válido con rol `admin` | Actualiza un producto                |
+| DELETE | `/api/productos/:id` | JWT válido con rol `admin` | Desactiva un producto                |
+
+El login responde con el token en `data.token` y el usuario en `data.usuario`.
+En las rutas protegidas se envía `Authorization: Bearer <token>`. El JWT incluye
+el id del usuario como `sub` y su `rol`; su duración se configura con
+`JWT_EXPIRES_IN` (el ejemplo de entorno configura `1d`). Las contraseñas se
+guardan hasheadas con bcrypt. El registro no inicia sesión automáticamente.
+Los errores de autenticación y autorización usan `401` y `403`,
+respectivamente; un email ya registrado devuelve `409`.
+
+El middleware global de CORS atiende los preflight `OPTIONS` antes de las rutas.
+Los ejemplos manuales de autenticación y autorización están en
+`backend/requests/auth.http`; usan `AUTH_TEST_EMAIL`, `AUTH_TEST_PASSWORD` y
+`JWT_EXPIRED_TOKEN` para los casos de prueba.
 
 ## Estructura del proyecto
 
@@ -167,7 +188,11 @@ Todas las respuestas tienen el formato `{ success, data, message }`.
 - `backend/middlewares/`: middlewares del servidor, incluido el manejador centralizado de errores
 - `backend/data/`: datos locales de los productos
 - `backend/models/product.js`: esquema de Mongoose para documentos de productos en la colección `productos`
-- `backend/scripts/seed.js`: carga idempotente del catálogo local a MongoDB
+- `backend/scripts/seed.js`: carga el catálogo y crea o actualiza el administrador
+- `backend/models/user.js`: esquema de usuario y contraseña no seleccionada por defecto
+- `backend/services/auth.service.js`: registro, login y firma de JWT
+- `backend/routes/auth.routes.js`: rutas de registro, login y perfil
+- `backend/requests/auth.http`: ejemplos de pruebas manuales de autenticación
 - `compose.yaml`: servicio MongoDB y volumen persistente de desarrollo
 - `.env.example`: plantilla de configuración local (copiar a `.env`)
 - `client/src/App.jsx`: estado global (productos y carrito) y definición de rutas
@@ -188,5 +213,5 @@ Todas las respuestas tienen el formato `{ success, data, message }`.
 - **Persistencia del carrito:** al iniciar, el carrito se lee de `localStorage` (clave `muebleria_carrito`) y un `useEffect` lo guarda cada vez que cambia. Si los datos guardados están dañados, el carrito empieza vacío.
 - **Llamadas a la API en `services/`:** los componentes no conocen las URLs ni el formato de respuesta.
 - **Proxy de Vite:** el cliente llama a rutas relativas (`/api/...`) y Vite las reenvía al backend, evitando problemas de CORS en desarrollo.
-- **Modelo de productos:** Mongoose define la estructura y validaciones de los documentos en `backend/models/product.js`. Los endpoints todavía leen el catálogo desde `backend/data/productos.js`; el modelo no está conectado a las rutas de la API.
+- **Modelo de productos:** Mongoose define la estructura y validaciones de los documentos en `backend/models/product.js`; los servicios de producto usan ese modelo para consultar y modificar MongoDB.
 - **Url de imagen en formulario de objetos:** Los formularios para crear y editar productos se colocan la url dentro del pryecto. Esto no es lo ideal desde el punto de vista del usuario, ya que se tendira que almacenar en un servicio de 3ros las imagenes para mejor disponibilidad. Pero por motivos de tiempo y simpleza se deja esta modalidad para la entrega.

@@ -13,3 +13,9 @@ npm run lint --prefix client
 Las llamadas HTTP se centralizan en `src/services/` y los formularios usan
 React Hook Form con Yup. La dependencia Zod se mantiene en `4.6.6` o superior
 mediante el override definido en `package.json`.
+
+## Autenticación
+
+El backend ofrece registro, login y perfil en `/api/auth`, y devuelve un JWT
+al iniciar sesión. El cliente todavía no implementa esos flujos ni almacena el
+token; por ahora, `localStorage` se utiliza únicamente para persistir el carrito.
