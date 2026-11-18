@@ -40,3 +40,25 @@ export default function requireAuth(request, response, next) {
     return next(error);
   }
 }
+
+export function soloRol(rolPermitido) {
+  if (!['cliente', 'admin'].includes(rolPermitido)) {
+    throw new Error(`Rol no válido: ${rolPermitido}`);
+  }
+
+  return (request, response, next) => {
+    if (!request.usuario) {
+      const error = new Error('Se requiere autenticación');
+      error.status = 401;
+      return next(error);
+    }
+
+    if (request.usuario.rol !== rolPermitido) {
+      const error = new Error('No tienes permisos para acceder a este recurso');
+      error.status = 403;
+      return next(error);
+    }
+
+    return next();
+  };
+}
