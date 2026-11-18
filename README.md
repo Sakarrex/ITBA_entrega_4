@@ -43,15 +43,17 @@ npm run db:down
 `db:down` detiene y elimina el contenedor, pero conserva los datos del volumen
 Docker `mongodb_data`.
 
-El catálogo actual está definido en `backend/data/productos.js`. Para copiarlo a
-la colección `productos` de MongoDB, ejecutar el seed manualmente:
+El catálogo actual está definido en `backend/data/productos.js`. El seed copia
+el catálogo a MongoDB y crea o actualiza el administrador usando `ADMIN_EMAIL`
+y `ADMIN_PASSWORD` del archivo `.env`:
 
 ```bash
 npm run db:seed
 ```
 
-El seed inserta o actualiza cada documento usando su campo `id`; se puede
-ejecutar más de una vez y no elimina documentos ajenos al catálogo fuente.
+El seed inserta o actualiza los productos por nombre y el usuario administrador
+por email. La contraseña del administrador se guarda hasheada con bcrypt. Se
+puede ejecutar más de una vez; no elimina productos ajenos al catálogo fuente.
 
 Para iniciar el backend y el cliente juntos:
 

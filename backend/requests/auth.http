@@ -1,0 +1,122 @@
+@base = http://localhost:3000/api
+@testEmail = {{$processEnv AUTH_TEST_EMAIL}}
+@testPassword = {{$processEnv AUTH_TEST_PASSWORD}}
+@adminEmail = {{$processEnv ADMIN_EMAIL}}
+@adminPassword = {{$processEnv ADMIN_PASSWORD}}
+@expiredToken = {{$processEnv JWT_EXPIRED_TOKEN}}
+
+# Definí AUTH_TEST_EMAIL y AUTH_TEST_PASSWORD para el usuario de prueba.
+# JWT_EXPIRED_TOKEN debe ser un JWT firmado con JWT_SECRET cuyo exp ya haya pasado.
+# PowerShell, con JWT_SECRET disponible en el entorno:
+# $env:JWT_EXPIRED_TOKEN = node -e "console.log(require('jsonwebtoken').sign({ sub: '000000000000000000000000', rol: 'cliente' }, process.env.JWT_SECRET, { expiresIn: -1 }))"
+
+### Registro correcto (201)
+# @name registroOk
+POST {{base}}/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Usuario de prueba",
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}"
+}
+
+### Email duplicado (409): ejecutar después de Registro correcto
+POST {{base}}/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Usuario de prueba",
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}"
+}
+
+### Password corto (400)
+POST {{base}}/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Usuario de prueba",
+  "email": "{{testEmail}}",
+  "password": "corta1"
+}
+
+### Login correcto (200)
+# @name loginOk
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}"
+}
+
+### Login incorrecto (401)
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{testEmail}}",
+  "password": "incorrecta123"
+}
+
+### Perfil con token (200)
+GET {{base}}/auth/perfil
+Authorization: Bearer {{loginOk.response.body.$.data.token}}
+
+### Perfil sin token (401)
+GET {{base}}/auth/perfil
+
+### Perfil con token vencido (401)
+GET {{base}}/auth/perfil
+Authorization: Bearer {{expiredToken}}
+
+### Login admin para obtener un token (200)
+# @name loginAdmin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### Crear producto como cliente (403)
+POST {{base}}/productos
+Authorization: Bearer {{loginOk.response.body.$.data.token}}
+Content-Type: application/json
+
+{
+  "nombre": "Producto de prueba",
+  "categoria": "Mesas",
+  "precio": 150000,
+  "precioOriginal": null,
+  "oferta": false,
+  "imagenUrl": "https://ejemplo.com/producto.jpg",
+  "alt": "Producto de prueba",
+  "descripcion": "Producto para probar permisos",
+  "material": "Roble",
+  "medidas": "120x80x75 cm",
+  "acabado": "Natural",
+  "stock": 5
+}
+
+### Crear producto como admin (201)
+POST {{base}}/productos
+Authorization: Bearer {{loginAdmin.response.body.$.data.token}}
+Content-Type: application/json
+
+{
+  "nombre": "Producto de prueba admin",
+  "categoria": "Mesas",
+  "precio": 150000,
+  "precioOriginal": null,
+  "oferta": false,
+  "imagenUrl": "https://ejemplo.com/producto.jpg",
+  "alt": "Producto de prueba",
+  "descripcion": "Producto para probar permisos de admin",
+  "material": "Roble",
+  "medidas": "120x80x75 cm",
+  "acabado": "Natural",
+  "stock": 5
+}
