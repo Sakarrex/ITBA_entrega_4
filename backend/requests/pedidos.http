@@ -1,0 +1,61 @@
+@baseUrl = http://localhost:3000/api
+@tokenCliente = REEMPLAZAR_CON_JWT_CLIENTE
+@productoValidoId = REEMPLAZAR_CON_OBJECTID_VALIDO
+@productoSinStockId = REEMPLAZAR_CON_OBJECTID_CON_POCO_STOCK
+
+### 1. Sin token -> 401
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+  "items": [
+    { "productoId": "{{productoValidoId}}", "cantidad": 1 }
+  ]
+}
+
+### 2. Carrito vacío -> 400
+POST {{baseUrl}}/pedidos
+Authorization: Bearer {{tokenCliente}}
+Content-Type: application/json
+
+{
+  "items": []
+}
+
+### 3. Producto inexistente -> 404
+POST {{baseUrl}}/pedidos
+Authorization: Bearer {{tokenCliente}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "productoId": "000000000000000000000000", "cantidad": 1 }
+  ]
+}
+
+### 4. Stock insuficiente -> 409
+POST {{baseUrl}}/pedidos
+Authorization: Bearer {{tokenCliente}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "productoId": "{{productoSinStockId}}", "cantidad": 99 }
+  ]
+}
+
+### 5. Pedido válido (ignorando precio/total enviados por el cliente) -> 201
+POST {{baseUrl}}/pedidos
+Authorization: Bearer {{tokenCliente}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "productoId": "{{productoValidoId}}", "cantidad": 2, "precioUnitario": 1 }
+  ],
+  "total": 1
+}
+
+### 6. Listar pedidos propios -> 200
+GET {{baseUrl}}/pedidos/mis-pedidos
+Authorization: Bearer {{tokenCliente}}
