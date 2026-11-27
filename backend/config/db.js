@@ -8,5 +8,8 @@ export async function connectDB() {
   }
 
   await mongoose.connect(uri);
-  console.log('MongoDB conectado'); // Despues sacarlo Team
+
+  if (process.env.NODE_ENV !== 'production') {
+  console.log('MongoDB conectado');
+}
 }

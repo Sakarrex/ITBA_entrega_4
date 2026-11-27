@@ -1,4 +1,5 @@
 const obtenerStatus = (err) => {
+  if (err.statusCode) return err.statusCode;
   if (err.status) return err.status;
   if (err.name === 'ValidationError' || err.name === 'CastError') return 400;
   if (err.code === 11000) return 409;
@@ -13,9 +14,13 @@ const errorMiddleware = (err, req, res, next) => {
   const statusCode = obtenerStatus(err);
   const esProduccion = process.env.NODE_ENV === 'production';
 
+  if (esProduccion) {
+    console.error(`[${statusCode}] ${err.message}`);
+  } else {
   console.error(err.message, err.stack);
+  }
 
-  res.status(statusCode).json({
+  return res.status(statusCode).json({
     success: false,
     data: null,
     message:

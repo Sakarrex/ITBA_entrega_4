@@ -10,6 +10,7 @@ import errorMiddleware from './middlewares/error.js';
 import healthRouter from './controllers/health.js';
 import authRouter from './routes/auth.routes.js';
 import productosRouter from './routes/productos.routes.js';
+import pedidosRouter from './routes/pedidos.routes.js';
 
 const directorioActual = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(directorioActual, '../.env') });
@@ -20,7 +21,7 @@ const port = process.env.PORT || 3000;
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN?.split(','),
+    origin: process.env.CLIENT_ORIGIN?.split(',').map((origen) => origen.trim()),
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   })
 );
@@ -29,6 +30,7 @@ app.use(logger);
 app.use('/api', healthRouter);
 app.use('/api/productos', productosRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/pedidos', pedidosRouter);
 
 app.use((request, response, next) => {
   const error = new Error(
